@@ -29,6 +29,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGeneral(Exception e) {
+        if (e instanceof AppException) {
+            return ResponseEntity.status(((AppException) e).getStatus())
+                    .body(Map.of("message", e.getMessage()));
+        }
         return ResponseEntity.internalServerError().body(Map.of("message", "서버 오류가 발생했습니다."));
     }
 }
