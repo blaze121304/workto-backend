@@ -14,3 +14,4 @@ services:
     restart: unless-stopped
     volumes:
       - /home/rusty/workto/workto-backend/src/main/resources/key/keyfile.properties:/app/keyfile.properties
+    #keyfile.properties는 마운트 되지않으므로 수동으로 옮겨야 함
