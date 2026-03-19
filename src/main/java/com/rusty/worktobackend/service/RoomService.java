@@ -6,6 +6,7 @@ import com.rusty.worktobackend.domain.dto.RoomResponse;
 import com.rusty.worktobackend.domain.entity.User;
 import com.rusty.worktobackend.domain.entity.WalkJoin;
 import com.rusty.worktobackend.domain.entity.WalkRoom;
+import com.rusty.worktobackend.repository.dao.PostRepository;
 import com.rusty.worktobackend.repository.dao.UserRepository;
 import com.rusty.worktobackend.repository.dao.WalkJoinRepository;
 import com.rusty.worktobackend.repository.dao.WalkRoomRepository;
@@ -22,6 +23,7 @@ public class RoomService {
 
     private final WalkRoomRepository walkRoomRepository;
     private final WalkJoinRepository walkJoinRepository;
+    private final PostRepository postRepository;
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
@@ -73,6 +75,7 @@ public class RoomService {
                 .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "참여하지 않은 방입니다."));
 
         if (room.getCreator().getId().equals(user.getId())) {
+            postRepository.deleteAllByRoom(room);
             walkJoinRepository.deleteAllByRoom(room);
             walkRoomRepository.delete(room);
         } else {

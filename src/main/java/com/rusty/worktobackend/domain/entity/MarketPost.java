@@ -10,35 +10,47 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Post {
+public class MarketPost {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false)
-    private WalkRoom room;
+    @Column(nullable = false)
+    private String title;
+
+    @Column(nullable = false)
+    private int price;
+
+    @Column(nullable = false)
+    private String imageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MarketStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private User author;
-
-    @Column(nullable = false)
-    private String content;
 
     private LocalDateTime createdAt;
 
     @PrePersist
     void prePersist() {
         this.createdAt = LocalDateTime.now();
+        this.status = MarketStatus.SALE;
     }
 
-    public static Post of(WalkRoom room, User author, String content) {
-        Post post = new Post();
-        post.room = room;
+    public static MarketPost of(String title, int price, String imageUrl, User author) {
+        MarketPost post = new MarketPost();
+        post.title = title;
+        post.price = price;
+        post.imageUrl = imageUrl;
         post.author = author;
-        post.content = content;
         return post;
+    }
+
+    public void markAsSold() {
+        this.status = MarketStatus.SOLD;
     }
 }

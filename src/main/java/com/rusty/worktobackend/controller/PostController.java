@@ -13,21 +13,30 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/api/rooms/{roomId}/posts")
 @RequiredArgsConstructor
 public class PostController {
 
     private final PostService postService;
 
     @GetMapping
-    public List<PostResponse> listPosts() {
-        return postService.listPosts();
+    public List<PostResponse> listPosts(@PathVariable Long roomId) {
+        return postService.listPosts(roomId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostResponse createPost(@Valid @RequestBody PostRequest request,
+    public PostResponse createPost(@PathVariable Long roomId,
+                                   @Valid @RequestBody PostRequest request,
                                    @AuthenticationPrincipal UserDetails userDetails) {
-        return postService.createPost(request, userDetails.getUsername());
+        return postService.createPost(roomId, request, userDetails.getUsername());
+    }
+
+    @DeleteMapping("/{postId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePost(@PathVariable Long roomId,
+                           @PathVariable Long postId,
+                           @AuthenticationPrincipal UserDetails userDetails) {
+        postService.deletePost(roomId, postId, userDetails.getUsername());
     }
 }
