@@ -22,7 +22,9 @@ public class MarketPost {
     @Column(nullable = false)
     private int price;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String description;
+
     private String imageUrl;
 
     @Enumerated(EnumType.STRING)
@@ -41,10 +43,11 @@ public class MarketPost {
         this.status = MarketStatus.SALE;
     }
 
-    public static MarketPost of(String title, int price, String imageUrl, User author) {
+    public static MarketPost of(String title, int price, String description, String imageUrl, User author) {
         MarketPost post = new MarketPost();
         post.title = title;
         post.price = price;
+        post.description = description;
         post.imageUrl = imageUrl;
         post.author = author;
         return post;

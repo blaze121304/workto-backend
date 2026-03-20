@@ -43,8 +43,8 @@ public class MarketPostService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
 
-        String imageUrl = saveImage(image);
-        MarketPost post = marketPostRepository.save(MarketPost.of(request.getTitle(), request.getPrice(), imageUrl, user));
+        String imageUrl = (image != null && !image.isEmpty()) ? saveImage(image) : null;
+        MarketPost post = marketPostRepository.save(MarketPost.of(request.getTitle(), request.getPrice(), request.getDescription(), imageUrl, user));
         return MarketPostResponse.from(post);
     }
 

@@ -30,7 +30,8 @@ public class AuthService {
         userRepository.save(User.of(
                 request.getEmail(),
                 passwordEncoder.encode(request.getPassword()),
-                request.getNickname()
+                request.getNickname(),
+                request.getDepartment()
         ));
     }
 
@@ -50,6 +51,6 @@ public class AuthService {
     public MeResponse me(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
-        return new MeResponse(user.getEmail(), user.getNickname());
+        return new MeResponse(user.getEmail(), user.getNickname(), user.getDepartment());
     }
 }

@@ -14,4 +14,7 @@ public class MarketPostRequest {
 
     @Min(0)
     private int price;
+
+    @NotBlank
+    private String description;
 }

@@ -14,8 +14,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<Map<String, String>> handleAppException(AppException e) {
-        log.error("서버 오류: ", e);  // 추가
-        return ResponseEntity.internalServerError().body(Map.of("message", "서버 오류가 발생했습니다."));
+        return ResponseEntity.status(e.getStatus()).body(Map.of("message", e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -29,10 +28,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGeneral(Exception e) {
-        if (e instanceof AppException) {
-            return ResponseEntity.status(((AppException) e).getStatus())
-                    .body(Map.of("message", e.getMessage()));
-        }
+        log.error("서버 오류: ", e);
         return ResponseEntity.internalServerError().body(Map.of("message", "서버 오류가 발생했습니다."));
     }
 }

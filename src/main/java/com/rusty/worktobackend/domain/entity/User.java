@@ -26,6 +26,9 @@ public class User {
     @Column(nullable = false)
     private String nickname;
 
+    @Column(nullable = false)
+    private String department;
+
     private LocalDateTime createdAt;
 
     @PrePersist
@@ -33,11 +36,12 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
-    public static User of(String email, String password, String nickname) {
+    public static User of(String email, String password, String nickname, String department) {
         User user = new User();
         user.email = email;
         user.password = password;
         user.nickname = nickname;
+        user.department = department;
         return user;
     }
 }

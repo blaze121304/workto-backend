@@ -30,7 +30,7 @@ public class MarketPostController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public MarketPostResponse createPost(@RequestPart("image") MultipartFile image,
+    public MarketPostResponse createPost(@RequestPart(value = "image", required = false) MultipartFile image,
                                          @RequestPart("data") String data,
                                          @AuthenticationPrincipal UserDetails userDetails) throws IOException {
         MarketPostRequest request = objectMapper.readValue(data, MarketPostRequest.class);

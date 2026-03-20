@@ -8,9 +8,11 @@ public record MarketPostResponse(
         Long id,
         String title,
         int price,
+        String description,
         String imageUrl,
         String status,
         String authorNickname,
+        String authorDepartment,
         LocalDateTime createdAt
 ) {
     public static MarketPostResponse from(MarketPost post) {
@@ -18,9 +20,11 @@ public record MarketPostResponse(
                 post.getId(),
                 post.getTitle(),
                 post.getPrice(),
+                post.getDescription(),
                 post.getImageUrl(),
                 post.getStatus().name(),
                 post.getAuthor().getNickname(),
+                post.getAuthor().getDepartment(),
                 post.getCreatedAt()
         );
     }
