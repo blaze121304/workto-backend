@@ -3,8 +3,10 @@ package com.rusty.worktobackend.service;
 import com.rusty.worktobackend.common.exception.AppException;
 import com.rusty.worktobackend.domain.dto.MarketPostRequest;
 import com.rusty.worktobackend.domain.dto.MarketPostResponse;
+import com.rusty.worktobackend.domain.entity.MarketFavorite;
 import com.rusty.worktobackend.domain.entity.MarketPost;
 import com.rusty.worktobackend.domain.entity.User;
+import com.rusty.worktobackend.repository.dao.MarketFavoriteRepository;
 import com.rusty.worktobackend.repository.dao.MarketPostRepository;
 import com.rusty.worktobackend.repository.dao.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import java.util.UUID;
 public class MarketPostService {
 
     private final MarketPostRepository marketPostRepository;
+    private final MarketFavoriteRepository marketFavoriteRepository;
     private final UserRepository userRepository;
 
     @Value("${app.image.upload-dir}")
@@ -61,6 +64,70 @@ public class MarketPostService {
 
         post.markAsSold();
         return MarketPostResponse.from(post);
+    }
+
+    @Transactional
+    public MarketPostResponse updatePost(Long postId, MultipartFile image, MarketPostRequest request, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
+        MarketPost post = marketPostRepository.findById(postId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."));
+
+        if (!post.getAuthor().getId().equals(user.getId())) {
+            throw new AppException(HttpStatus.FORBIDDEN, "본인 게시글만 수정할 수 있습니다.");
+        }
+
+        String imageUrl = (image != null && !image.isEmpty()) ? saveImage(image) : null;
+        post.update(request.getTitle(), request.getPrice(), request.getDescription(), imageUrl);
+        return MarketPostResponse.from(post);
+    }
+
+    @Transactional
+    public void deletePost(Long postId, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
+        MarketPost post = marketPostRepository.findById(postId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."));
+
+        if (!post.getAuthor().getId().equals(user.getId())) {
+            throw new AppException(HttpStatus.FORBIDDEN, "본인 게시글만 삭제할 수 있습니다.");
+        }
+
+        deleteImageFile(post.getImageUrl());
+        marketPostRepository.delete(post);
+    }
+
+    @Transactional
+    public MarketPostResponse toggleFavorite(Long postId, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
+        MarketPost post = marketPostRepository.findById(postId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."));
+
+        marketFavoriteRepository.findByUserAndMarketPost(user, post)
+                .ifPresentOrElse(
+                        existing -> {
+                            marketFavoriteRepository.delete(existing);
+                            post.removeFavorite();
+                        },
+                        () -> {
+                            marketFavoriteRepository.save(MarketFavorite.of(user, post));
+                            post.addFavorite();
+                        }
+                );
+
+        return MarketPostResponse.from(post);
+    }
+
+    private void deleteImageFile(String imageUrl) {
+        if (imageUrl == null) return;
+        try {
+            String filename = imageUrl.replace("/images/", "");
+            Path filePath = Paths.get(uploadDir).resolve(filename);
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            // 파일 삭제 실패는 무시 (게시글 삭제는 진행)
+        }
     }
 
     private String saveImage(MultipartFile image) {

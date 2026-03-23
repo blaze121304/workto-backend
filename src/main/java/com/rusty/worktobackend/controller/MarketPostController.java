@@ -42,4 +42,26 @@ public class MarketPostController {
                                          @AuthenticationPrincipal UserDetails userDetails) {
         return marketPostService.markAsSold(id, userDetails.getUsername());
     }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public MarketPostResponse updatePost(@PathVariable Long id,
+                                         @RequestPart(value = "image", required = false) MultipartFile image,
+                                         @RequestPart("data") String data,
+                                         @AuthenticationPrincipal UserDetails userDetails) throws IOException {
+        MarketPostRequest request = objectMapper.readValue(data, MarketPostRequest.class);
+        return marketPostService.updatePost(id, image, request, userDetails.getUsername());
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePost(@PathVariable Long id,
+                           @AuthenticationPrincipal UserDetails userDetails) {
+        marketPostService.deletePost(id, userDetails.getUsername());
+    }
+
+    @PostMapping("/{id}/favorite")
+    public MarketPostResponse toggleFavorite(@PathVariable Long id,
+                                             @AuthenticationPrincipal UserDetails userDetails) {
+        return marketPostService.toggleFavorite(id, userDetails.getUsername());
+    }
 }

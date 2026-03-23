@@ -13,6 +13,7 @@ public record MarketPostResponse(
         String status,
         String authorNickname,
         String authorDepartment,
+        int favorite,
         LocalDateTime createdAt
 ) {
     public static MarketPostResponse from(MarketPost post) {
@@ -25,6 +26,7 @@ public record MarketPostResponse(
                 post.getStatus().name(),
                 post.getAuthor().getNickname(),
                 post.getAuthor().getDepartment(),
+                post.getFavorite(),
                 post.getCreatedAt()
         );
     }
