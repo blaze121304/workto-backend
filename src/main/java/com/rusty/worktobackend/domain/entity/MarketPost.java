@@ -61,6 +61,10 @@ public class MarketPost {
         this.status = MarketStatus.SOLD;
     }
 
+    public void markAsOnSale() {
+        this.status = MarketStatus.SALE;
+    }
+
     public void update(String title, int price, String description, String imageUrl) {
         this.title = title;
         this.price = price;

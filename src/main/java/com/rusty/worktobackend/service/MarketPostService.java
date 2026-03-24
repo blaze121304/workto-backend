@@ -34,6 +34,9 @@ public class MarketPostService {
     @Value("${app.image.upload-dir}")
     private String uploadDir;
 
+    @Value("${app.base-url}")
+    private String baseUrl;
+
     @Transactional(readOnly = true)
     public List<MarketPostResponse> listPosts() {
         return marketPostRepository.findAllByOrderByCreatedAtDesc().stream()
@@ -48,6 +51,21 @@ public class MarketPostService {
 
         String imageUrl = (image != null && !image.isEmpty()) ? saveImage(image) : null;
         MarketPost post = marketPostRepository.save(MarketPost.of(request.getTitle(), request.getPrice(), request.getDescription(), imageUrl, user));
+        return MarketPostResponse.from(post);
+    }
+
+    @Transactional
+    public MarketPostResponse markAsOnSale(Long postId, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다."));
+        MarketPost post = marketPostRepository.findById(postId)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."));
+
+        if (!post.getAuthor().getId().equals(user.getId())) {
+            throw new AppException(HttpStatus.FORBIDDEN, "본인 게시글만 상태를 변경할 수 있습니다.");
+        }
+
+        post.markAsOnSale();
         return MarketPostResponse.from(post);
     }
 
@@ -122,7 +140,7 @@ public class MarketPostService {
     private void deleteImageFile(String imageUrl) {
         if (imageUrl == null) return;
         try {
-            String filename = imageUrl.replace("/images/", "");
+            String filename = imageUrl.substring(imageUrl.lastIndexOf("/images/") + "/images/".length());
             Path filePath = Paths.get(uploadDir).resolve(filename);
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
@@ -138,7 +156,7 @@ public class MarketPostService {
                 Files.createDirectories(uploadPath);
             }
             Files.copy(image.getInputStream(), uploadPath.resolve(filename));
-            return "/images/" + filename;
+            return baseUrl + "/images/" + filename;
         } catch (IOException e) {
             throw new AppException(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 저장에 실패했습니다.");
         }

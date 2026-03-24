@@ -43,6 +43,12 @@ public class MarketPostController {
         return marketPostService.markAsSold(id, userDetails.getUsername());
     }
 
+    @PatchMapping("/{id}/sale")
+    public MarketPostResponse markAsOnSale(@PathVariable Long id,
+                                           @AuthenticationPrincipal UserDetails userDetails) {
+        return marketPostService.markAsOnSale(id, userDetails.getUsername());
+    }
+
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public MarketPostResponse updatePost(@PathVariable Long id,
                                          @RequestPart(value = "image", required = false) MultipartFile image,
