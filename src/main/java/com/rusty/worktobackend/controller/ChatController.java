@@ -45,4 +45,11 @@ public class ChatController {
                                            @AuthenticationPrincipal UserDetails userDetails) {
         return chatService.sendMessage(roomId, request, userDetails.getUsername());
     }
+
+    @DeleteMapping("/rooms/{roomId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void leaveRoom(@PathVariable Long roomId,
+                          @AuthenticationPrincipal UserDetails userDetails) {
+        chatService.leaveRoom(roomId, userDetails.getUsername());
+    }
 }

@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(xargs find:*)"
+      "Bash(xargs find:*)",
+      "Bash(find C:UsersblazeIdeaProjectsworkto-backend -type f \\\\\\(-name application*.properties -o -name application*.yml -o -name nginx.conf -o -name Dockerfile* -o -name docker-compose* \\\\\\))"
     ]
   }
 }

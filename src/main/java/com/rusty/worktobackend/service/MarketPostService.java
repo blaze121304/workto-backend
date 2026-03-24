@@ -3,9 +3,12 @@ package com.rusty.worktobackend.service;
 import com.rusty.worktobackend.common.exception.AppException;
 import com.rusty.worktobackend.domain.dto.MarketPostRequest;
 import com.rusty.worktobackend.domain.dto.MarketPostResponse;
+import com.rusty.worktobackend.domain.entity.ChatRoom;
 import com.rusty.worktobackend.domain.entity.MarketFavorite;
 import com.rusty.worktobackend.domain.entity.MarketPost;
 import com.rusty.worktobackend.domain.entity.User;
+import com.rusty.worktobackend.repository.dao.ChatMessageRepository;
+import com.rusty.worktobackend.repository.dao.ChatRoomRepository;
 import com.rusty.worktobackend.repository.dao.MarketFavoriteRepository;
 import com.rusty.worktobackend.repository.dao.MarketPostRepository;
 import com.rusty.worktobackend.repository.dao.UserRepository;
@@ -30,6 +33,8 @@ public class MarketPostService {
     private final MarketPostRepository marketPostRepository;
     private final MarketFavoriteRepository marketFavoriteRepository;
     private final UserRepository userRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Value("${app.image.upload-dir}")
     private String uploadDir;
@@ -111,6 +116,11 @@ public class MarketPostService {
             throw new AppException(HttpStatus.FORBIDDEN, "본인 게시글만 삭제할 수 있습니다.");
         }
 
+        List<ChatRoom> chatRooms = chatRoomRepository.findAllByMarketPost(post);
+        for (ChatRoom room : chatRooms) {
+            chatMessageRepository.deleteAllByRoom(room);
+        }
+        chatRoomRepository.deleteAll(chatRooms);
         deleteImageFile(post.getImageUrl());
         marketPostRepository.delete(post);
     }

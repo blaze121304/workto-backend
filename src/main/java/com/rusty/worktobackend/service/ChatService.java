@@ -71,6 +71,15 @@ public class ChatService {
         return ChatMessageResponse.from(message);
     }
 
+    @Transactional
+    public void leaveRoom(Long roomId, String email) {
+        User user = getUser(email);
+        ChatRoom room = getRoom(roomId);
+        validateParticipant(room, user);
+        chatMessageRepository.deleteAllByRoom(room);
+        chatRoomRepository.delete(room);
+    }
+
     private void validateParticipant(ChatRoom room, User user) {
         boolean isParticipant = room.getBuyer().getId().equals(user.getId())
                 || room.getSeller().getId().equals(user.getId());
